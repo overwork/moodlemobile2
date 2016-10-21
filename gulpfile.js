@@ -213,7 +213,7 @@ function buildLangs(filenames, langPaths, buildDest, done) {
       return path + language + '.json';
     });
 
-    gulp.src(paths)
+    gulp.src(paths, { allowEmpty: true })
       .pipe(gulpSlash())
       .pipe(clipEmptyFiles())
       .pipe(through(function(file) {
@@ -354,8 +354,6 @@ var remoteAddonPaths = {
   ]
 };
 
-gulp.task('default', ['build', 'sass', 'lang', 'config']);
-
 gulp.task('sass-build', function(done) {
   gulp.src(paths.sass.core)
     .pipe(concat('mm.bundle.scss'))
@@ -363,7 +361,7 @@ gulp.task('sass-build', function(done) {
     .on('end', done);
 });
 
-gulp.task('sass', ['sass-build'], function(done) {
+gulp.task('sass', gulp.series('sass-build', function(done) {
   gulp.src(paths.sass.custom)
     .pipe(concat('mm.bundle.css'))
     .pipe(sass())
@@ -374,7 +372,7 @@ gulp.task('sass', ['sass-build'], function(done) {
     .pipe(rename({ extname: '.min.css' }))
     .pipe(gulp.dest(paths.build))
     .on('end', done);
-});
+}));
 
 gulp.task('watch', function() {
   gulp.watch(paths.sass.core, { interval: 500 }, ['sass']);
@@ -400,7 +398,7 @@ gulp.task('lang', function(done) {
 });
 
 // Convert config.json into an AngularJS constant and append it to build file.
-gulp.task('config', ['build'], function(done) {
+gulp.task('config', gulp.series('build', function(done) {
   var source = [paths.build + '/' + buildFile, paths.config],
     configName = paths.config.substr(paths.config.lastIndexOf('/') + 1);
 
@@ -417,7 +415,7 @@ gulp.task('config', ['build'], function(done) {
     .pipe(concat(buildFile))
     .pipe(gulp.dest(paths.build))
     .on('end', done);
-});
+}));
 
 // Build config file for e2e testing.
 gulp.task('e2e-build', function() {
@@ -702,7 +700,7 @@ gulp.task('remoteaddon-copy', function(done) {
 });
 
 // Build JS file for remote addon.
-gulp.task('remoteaddon-build', ['remoteaddon-copy'], function(done) {
+gulp.task('remoteaddon-build', gulp.series('remoteaddon-copy', function(done) {
   var path,
     pathToReplace,
     wildcard = '$ADDONPATH$',
@@ -733,10 +731,10 @@ gulp.task('remoteaddon-build', ['remoteaddon-copy'], function(done) {
   replace[pathToReplace] = wildcard;
 
   buildJS(jsPaths, npmPath.join(path, remoteAddonPackageFolder), remoteAddonBuildFile, '', false, replace, done);
-});
+}));
 
 // Build styles for remote addon.
-gulp.task('remoteaddon-sass', ['remoteaddon-copy'], function(done) {
+gulp.task('remoteaddon-sass', gulp.series('remoteaddon-copy', function(done) {
   var path,
     sassPaths,
     newYargs = treatRemoteAddonParams(yargs);
@@ -753,10 +751,10 @@ gulp.task('remoteaddon-sass', ['remoteaddon-copy'], function(done) {
     .pipe(sass())
     .pipe(gulp.dest(npmPath.join(path, remoteAddonPackageFolder)))
     .on('end', done);
-});
+}));
 
 // Treat language files.
-gulp.task('remoteaddon-lang', ['remoteaddon-copy'], function(done) {
+gulp.task('remoteaddon-lang', gulp.series('remoteaddon-copy', function(done) {
   var path,
     langPaths,
     filenames = [],
@@ -798,10 +796,10 @@ gulp.task('remoteaddon-lang', ['remoteaddon-copy'], function(done) {
   });
 
   buildLangs(filenames, langPaths, buildDest, done);
-});
+}));
 
 // Remote addons packaging.
-gulp.task('remoteaddon', ['remoteaddon-build', 'remoteaddon-sass', 'remoteaddon-lang'], function(done) {
+gulp.task('remoteaddon', gulp.series('remoteaddon-build', 'remoteaddon-sass', 'remoteaddon-lang', function(done) {
   var path,
     sources = [],
     outputFolder,
@@ -848,4 +846,7 @@ gulp.task('remoteaddon', ['remoteaddon-build', 'remoteaddon-sass', 'remoteaddon-
       deleteFolderRecursive(pathToPackageFolder);
       done();
     });
-});
+}));
+
+
+gulp.task('default', gulp.series('build', 'sass', 'lang', 'config'));
