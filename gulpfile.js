@@ -1,6 +1,5 @@
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var bower = require('bower');
 var concat = require('gulp-concat');
 var insert = require('gulp-insert');
 var stripComments = require('gulp-strip-comments');
@@ -333,7 +332,23 @@ var paths = {
     specs: [
       './www/**/e2e/*.spec.js'
     ]
-  }
+  },
+  npmLibs: [
+    'angular-aria',
+    'angular-ckeditor',
+    'angular-md5',
+    'angular-mocks',
+    'angular-translate/dist',
+    'angular-translate-loader-partial',
+    'ckeditor',
+    'ionic-angular/release',
+    'ionic-angular/scss',
+    'jszip/dist',
+    'moment/min',
+    'ng-cordova/dist',
+    'oclazyload/dist',
+    'ydn.db/jsc'
+  ]
 };
 
 var remoteAddonPaths = {
@@ -354,7 +369,7 @@ var remoteAddonPaths = {
   ]
 };
 
-gulp.task('default', ['build', 'sass', 'lang', 'config']);
+gulp.task('default', ['libs', 'build', 'sass', 'lang', 'config']);
 
 gulp.task('sass-build', function(done) {
   gulp.src(paths.sass.core)
@@ -363,7 +378,7 @@ gulp.task('sass-build', function(done) {
     .on('end', done);
 });
 
-gulp.task('sass', ['sass-build'], function(done) {
+gulp.task('sass', ['sass-build', 'libs'], function(done) {
   gulp.src(paths.sass.custom)
     .pipe(concat('mm.bundle.css'))
     .pipe(sass())
@@ -416,6 +431,17 @@ gulp.task('config', ['build'], function(done) {
     }))
     .pipe(concat(buildFile))
     .pipe(gulp.dest(paths.build))
+    .on('end', done);
+});
+
+// Moves required dependencies from npm_modules to www/lib
+gulp.task('libs', function(done) {
+  var libPaths = paths.npmLibs.map(function(path) {
+    return 'node_modules/' + path + '/**/*';
+  });
+
+  gulp.src(libPaths, { base : 'node_modules'})
+    .pipe(gulp.dest('www/lib'))
     .on('end', done);
 });
 
