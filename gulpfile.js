@@ -381,7 +381,7 @@ gulp.task('sass-build', function(done) {
     .on('end', done);
 });
 
-gulp.task('sass', ['sass-build'], function(done) {
+gulp.task('sass', ['sass-build', 'libs'], function(done) {
   gulp.src(paths.sass.custom)
     .pipe(concat('mm.bundle.css'))
     .pipe(sass())
