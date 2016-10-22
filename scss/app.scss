@@ -20,10 +20,10 @@ $button-default-active-bg: $positive;
 $button-default-active-border: $positive;
 
 // The path to the font icons.
-$ionicons-font-path: "../lib/ionic/release/fonts" !default;
+$ionicons-font-path: "../lib/ionic-angular/release/fonts" !default;
 
 // Include all of Ionic.
-@import "www/lib/ionic/scss/ionic";
+@import "www/lib/ionic-angular/scss/ionic";
 
 // Tmp fix until Ionic adds !default to $button-default-border and $button-default-active-border.
 $button-default-bg: white;
