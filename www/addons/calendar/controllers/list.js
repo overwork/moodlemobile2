@@ -106,4 +106,17 @@ angular.module('mm.addons.calendar')
             });
         });
     };
+
+    $scope.pushToCalendar = function(event) {
+        $scope.cal = window.plugins.calendar;
+
+        $scope.success = function(message) {alert("Success: " + JSON.stringify(message))};
+        $scope.error   = function(message) {alert("Error: " + message)};
+
+        $scope.selEvent = event;
+        console.log($scope.selEvent);
+
+        $scope.cal.createEvent(selEvent.name, selEvent.eventtype, selEvent.description, start, end, onSuccess, onError);
+
+    };
 });
