@@ -1036,5 +1036,41 @@ angular.module('mm.addons.messages')
         });
     };
 
+    /**
+     * Delete a discussion (online or offline).
+     *
+     * @module mm.addons.messages
+     * @ngdoc method
+     * @name $mmaMessages#deleteDiscussion
+     * @param {Object} discussion Discussion to delete.
+     * @return {Promise}       Promise resolved when the discussion has been deleted.
+     */
+    self.deleteDiscussion = function(discussion) {
+        // NOTE: Currently only deletes online, as it could only delete offline if all messages
+        // are offline, and it would have to check each message.
+        return self.deleteDiscussionOnline(discussion.message.user);
+    };
+
+    /**
+     * Delete a discussion from the server.
+     *
+     * @module mm.addons.messages
+     * @ngdoc method
+     * @name $mmaMessages#deleteDiscussionOnline
+     * @param {Number} usertoId ID of user conversation is with.
+     * @param {Number} [userId] User we want to delete the conversation for. If not defined, use current user.
+     * @return {Promise}        Promise resolved when the discussion has been deleted.
+     */
+    self.deleteDiscussionOnline = function(usertoId, userId) {
+        userId = userId || $mmSite.getUserId();
+        var params = {
+                userid: userId,
+                otheruserid: usertoId
+            };
+        return $mmSite.write('core_message_delete_conversation', params).then(function() {
+            return self.invalidateDiscussionsCache();
+        });
+    };
+
     return self;
 });

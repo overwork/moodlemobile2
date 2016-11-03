@@ -114,5 +114,13 @@ $mma-messages-date-badge: "stable" !default;
         border: none;
       }
     }
+
+    .mma-messages-discussions-delete {
+      background-color: red;
+
+      i {
+        color: white;
+      }
+    }
   }
 }
