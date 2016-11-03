@@ -334,7 +334,6 @@ var paths = {
     ]
   },
   npmLibs: [
-    'angular',
     'angular-aria',
     'angular-ckeditor',
     'angular-md5',
