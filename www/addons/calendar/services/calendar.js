@@ -38,7 +38,7 @@ angular.module('mm.addons.calendar')
  * @ngdoc service
  * @name $mmaCalendar
  */
-.factory('$mmaCalendar', function($log, $q, $mmSite, $mmUtil, $mmCourses, $mmGroups, $mmCourse, $mmLocalNotifications,
+.factory('$mmaCalendar', function($log, $q, $mmSite, $cordovaCalendar, $mmUtil, $mmCourses, $mmGroups, $mmCourse, $mmLocalNotifications,
         $mmSitesManager, mmCoreSecondsDay, mmaCalendarDaysInterval, mmaCalendarEventsStore, mmaCalendarDefaultNotifTime,
         mmaCalendarComponent) {
 

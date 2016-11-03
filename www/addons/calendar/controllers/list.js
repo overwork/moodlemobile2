@@ -21,7 +21,7 @@ angular.module('mm.addons.calendar')
  * @ngdoc controller
  * @name mmaCalendarListCtrl
  */
-.controller('mmaCalendarListCtrl', function($scope, $stateParams, $log, $state, $mmaCalendar, $mmUtil, $ionicHistory,
+.controller('mmaCalendarListCtrl', function($scope, $stateParams, $log, $cordovaCalendar, $timeout, $state, $mmaCalendar, $mmUtil, $ionicHistory,
         mmaCalendarDaysInterval) {
 
     $log = $log.getInstance('mmaCalendarListCtrl');
@@ -107,16 +107,46 @@ angular.module('mm.addons.calendar')
         });
     };
 
-    $scope.pushToCalendar = function(event) {
-        $scope.cal = window.plugins.calendar;
+    $scope.addEvent = function(event,idx) {
+        console.log("add ", event);
 
-        $scope.success = function(message) {alert("Success: " + JSON.stringify(message))};
-        $scope.error   = function(message) {alert("Error: " + message)};
+        if(event.timestart == (event.timestart + event.timeduration)){
+            event.timeduration += 900;
+            console.log("START END SAME TIME: add duration 15: ", event.timeduration);
 
-        $scope.selEvent = event;
-        console.log($scope.selEvent);
+        }else{
+            console.log("START END DIFFERENT TIME");
+        }
 
-        $scope.cal.createEvent(selEvent.name, selEvent.eventtype, selEvent.description, start, end, onSuccess, onError);
+        console.log("start ", event.timestart);
+        console.log("end ", event.timestart + event.timeduration);
+
+
+        $scope.startDate = new Date(event.timestart * 1000);
+        $scope.endDate = new Date((event.timestart + event.timeduration) * 1000);
+        console.log("Start date: ", $scope.startDate);
+        console.log("End date: ", $scope.endDate);
+
+        $cordovaCalendar.createCalendar({
+            calendarName: 'Moodle Calendar',
+            calendarColor: '#ff8c00'
+        }).then(function (result) {
+            // success
+        }, function (err) {
+            // error
+        });
+
+        $cordovaCalendar.createEventInNamedCalendar({
+            title: event.name,
+            notes: event.description,
+            startDate: $scope.startDate,
+            endDate: $scope.endDate,
+            calendarName: 'Moodle Calendar'
+        }).then(function (result) {
+            // success
+        }, function (err) {
+            // error
+        });
 
     };
 });

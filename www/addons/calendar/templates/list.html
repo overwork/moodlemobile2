@@ -13,7 +13,8 @@
                                 <h2><mm-format-text watch="true">{{event.name}}</mm-format-text></h2>
                                 <p>{{ event.timestart | mmToLocaleString }}</p>
                             </a>
-                            <button ng-click="pushToCalendar(event)">Push to local calendar</button>
+                            <p ng-if="event.status">This event is added to your calendar already!</p>
+                            <button ng-if="!event.status" ng-click="addEvent(event,$index)" class="button button-block button-balanced">Add to Calendar</button>
                         </div>
                     </li>
                 </ul>
