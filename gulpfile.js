@@ -338,15 +338,16 @@ var paths = {
     'angular-ckeditor',
     'angular-md5',
     'angular-mocks',
-    'angular-translate',
+    'angular-translate/dist',
     'angular-translate-loader-partial',
     'ckeditor',
-    'ionic-angular',
-    'jszip',
-    'moment',
-    'ng-cordova',
-    'oclazyload',
-    'ydn.db'
+    'ionic-angular/release',
+    'ionic-angular/scss',
+    'jszip/dist',
+    'moment/min',
+    'ng-cordova/dist',
+    'oclazyload/dist',
+    'ydn.db/jsc'
   ]
 };
 
