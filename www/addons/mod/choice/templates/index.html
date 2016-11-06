@@ -58,12 +58,12 @@
 
                 <canvas class="chart chart-pie" chart-data="data" chart-labels="labels" ></canvas>
                 
-                <div ng-repeat="result in results">
+                <div ng-repeat="result in results" ng-if="choice.publish">
                     <div class="row">
                         <p class="row"><b><mm-format-text watch="true">{{ result.text }}</mm-format-text></b></p>
                     </div>
                      <div class="col text-center">
-                         <a ng-if="choice.publish" class="padding mma-mod_choice-user fixed-width" ng-repeat="user in result.userresponses" mm-user-link courseid="{{courseid}}" userid="{{user.userid}}" title="{{user.fullname}}">
+                         <a class="padding mma-mod_choice-user fixed-width" ng-repeat="user in result.userresponses" mm-user-link courseid="{{courseid}}" userid="{{user.userid}}" title="{{user.fullname}}">
                              <img ng-src="{{user.profileimageurl}}" alt="{{user.fullname}}" mm-external-content>
                              <p>{{user.fullname}}</p>
                          </a>
