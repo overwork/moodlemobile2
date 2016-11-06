@@ -3,6 +3,8 @@
         <ion-content mm-state-class>
             <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="eventsLoaded" on-refresh="refreshEvents()">
             </ion-refresher>
+            <button ng-click="syncAllEvents(events)">Sync all events</button>
+            <button ng-click="syncSpecific()">Sync specific events</button>
             <mm-loading hide-until="eventsLoaded">
                 <ul class="list">
                     <li ng-if="count == 0" class="item">{{ 'mma.calendar.noevents' | translate }}</li>
@@ -14,7 +16,7 @@
                                 <p>{{ event.timestart | mmToLocaleString }}</p>
                             </a>
                             <p ng-if="event.status">This event is added to your calendar already!</p>
-                            <button ng-if="!event.status" ng-click="addEvent(event,$index)" class="button button-block button-balanced">Add to Calendar</button>
+                            <button ng-if="syncSpecificEvent == true" ng-click="addEvent(event,$index)" class="button button-block button-balanced">Add to Calendar</button>
                         </div>
                     </li>
                 </ul>

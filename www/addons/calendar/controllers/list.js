@@ -25,6 +25,8 @@ angular.module('mm.addons.calendar')
         mmaCalendarDaysInterval) {
 
     $log = $log.getInstance('mmaCalendarListCtrl');
+    $scope.syncSpecificEvent = false;
+    $scope.eventsToSync = [];
 
     var daysLoaded,
         emptyEventsTimes; // Variable to identify consecutive calls returning 0 events.
@@ -107,46 +109,49 @@ angular.module('mm.addons.calendar')
         });
     };
 
-    $scope.addEvent = function(event,idx) {
-        console.log("add ", event);
+    $scope.syncAllEvents = function(events){
+        console.log("Sync all events: ", events);
+        $scope.eventsToSync = events;
 
-        if(event.timestart == (event.timestart + event.timeduration)){
-            event.timeduration += 900;
-            console.log("START END SAME TIME: add duration 15: ", event.timeduration);
-
-        }else{
-            console.log("START END DIFFERENT TIME");
+        for(var i in $scope.eventsToSync){
+           $mmaCalendar.syncEventToLocalCalendar($scope.eventsToSync[i]).then(function(result) {
+                console.log("done adding event, result is "+result);
+                if(result === 1) {
+                    //update the event
+                    console.log("success");
+                } else {
+                    console.log("error");
+                    //error
+                }
+            });
         }
-
-        console.log("start ", event.timestart);
-        console.log("end ", event.timestart + event.timeduration);
+    };
 
 
-        $scope.startDate = new Date(event.timestart * 1000);
-        $scope.endDate = new Date((event.timestart + event.timeduration) * 1000);
-        console.log("Start date: ", $scope.startDate);
-        console.log("End date: ", $scope.endDate);
+    $scope.syncSpecific = function() {
+        if($scope.syncSpecificEvent == false){
+            $scope.syncSpecificEvent = true;
+        }else{
+            $scope.syncSpecificEvent = false;
+        }
+    };
 
-        $cordovaCalendar.createCalendar({
-            calendarName: 'Moodle Calendar',
-            calendarColor: '#ff8c00'
-        }).then(function (result) {
-            // success
-        }, function (err) {
-            // error
+    $scope.addEvent = function(event) {
+        console.log("add ", event);
+        $scope.eventsToSync = event;
+
+        $mmaCalendar.syncEventToLocalCalendar($scope.eventsToSync).then(function(result) {
+            console.log("done adding event, result is "+result);
+            if(result === 1) {
+                //update the event
+                console.log("success");
+            } else {
+                console.log("error");
+                //For now... maybe just tell the user it didn't work?
+            }
         });
 
-        $cordovaCalendar.createEventInNamedCalendar({
-            title: event.name,
-            notes: event.description,
-            startDate: $scope.startDate,
-            endDate: $scope.endDate,
-            calendarName: 'Moodle Calendar'
-        }).then(function (result) {
-            // success
-        }, function (err) {
-            // error
-        });
+
 
     };
 });
