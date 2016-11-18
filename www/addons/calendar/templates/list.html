@@ -3,8 +3,7 @@
         <ion-content mm-state-class>
             <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="eventsLoaded" on-refresh="refreshEvents()">
             </ion-refresher>
-            <button ng-click="syncAllEvents(events)">Sync all events</button>
-            <button ng-click="syncSpecific()">Sync specific events</button>
+            <button class="button button-small button-dark" ng-click="syncSpecific()">Syncronize spesific events</button>
             <mm-loading hide-until="eventsLoaded">
                 <ul class="list">
                     <li ng-if="count == 0" class="item">{{ 'mma.calendar.noevents' | translate }}</li>
@@ -26,6 +25,9 @@
                         on-infinite="loadMoreEvents()" >
                  </ion-infinite-scroll>
             </mm-loading>
+            <div ng-click="syncAllEvents(events)" class="bar bar-footer bar-dark">
+                <div class="title ion-loop"> Syncronize events</div>
+            </div>
         </ion-content>
     </mm-split-view>
 </ion-view>

@@ -21,12 +21,13 @@ angular.module('mm.addons.calendar')
  * @ngdoc controller
  * @name mmaCalendarListCtrl
  */
-.controller('mmaCalendarListCtrl', function($scope, $stateParams, $log, $cordovaCalendar, $timeout, $state, $mmaCalendar, $mmUtil, $ionicHistory,
+.controller('mmaCalendarListCtrl', function($scope, $stateParams, $q, $log, $cordovaCalendar, $timeout, $state, $mmaCalendar, $mmUtil, $ionicHistory,
         mmaCalendarDaysInterval) {
 
     $log = $log.getInstance('mmaCalendarListCtrl');
     $scope.syncSpecificEvent = false;
     $scope.eventsToSync = [];
+    $scope.events
 
     var daysLoaded,
         emptyEventsTimes; // Variable to identify consecutive calls returning 0 events.
@@ -85,6 +86,7 @@ angular.module('mm.addons.calendar')
             }
             $scope.eventsLoaded = true;
         });
+        findAllEvents();
     }
 
     initVars();
@@ -107,24 +109,29 @@ angular.module('mm.addons.calendar')
                 $scope.$broadcast('scroll.refreshComplete');
             });
         });
+        findAllEvents();
     };
 
-    $scope.syncAllEvents = function(events){
+    $scope.syncAllEvents = function(events) {
+        var promises = [];
         console.log("Sync all events: ", events);
         $scope.eventsToSync = events;
 
-        for(var i in $scope.eventsToSync){
-           $mmaCalendar.syncEventToLocalCalendar($scope.eventsToSync[i]).then(function(result) {
-                console.log("done adding event, result is "+result);
-                if(result === 1) {
-                    //update the event
+        angular.forEach($scope.eventsToSync, function (event) {
+           var promise = $mmaCalendar.syncEventToLocalCalendar(event).then(function (result) {
+                console.log("done adding event, result is " + result);
+                if (result === 1) {
                     console.log("success");
+                    //update event
                 } else {
                     console.log("error");
-                    //error
                 }
             });
-        }
+            promises.push(promise);
+       });
+        $q.all(promises).then(function () {
+            console.log("All events has been synced");
+        });
     };
 
 
@@ -134,6 +141,7 @@ angular.module('mm.addons.calendar')
         }else{
             $scope.syncSpecificEvent = false;
         }
+
     };
 
     $scope.addEvent = function(event) {
@@ -143,7 +151,7 @@ angular.module('mm.addons.calendar')
         $mmaCalendar.syncEventToLocalCalendar($scope.eventsToSync).then(function(result) {
             console.log("done adding event, result is "+result);
             if(result === 1) {
-                //update the event
+                event.status = 1;
                 console.log("success");
             } else {
                 console.log("error");
@@ -152,6 +160,15 @@ angular.module('mm.addons.calendar')
         });
 
 
+
+    };
+    $scope.findAllEvents = function() {
+
+        $cordovaCalendar.findAllEventsInNamedCalendar('Moodle Calendar').then(function (result) {
+            console.log(result);
+        }, function (err) {
+            // error
+        });
 
     };
 });
