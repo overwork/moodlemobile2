@@ -22,7 +22,7 @@ angular.module('mm.core.sidemenu')
  * @name mmSideMenuCtrl
  */
 .controller('mmSideMenuCtrl', function($scope, $state, $mmSideMenuDelegate, $mmSitesManager, $mmSite, $mmEvents,
-            $timeout, mmCoreEventLanguageChanged, mmCoreEventSiteUpdated, $mmSideMenu) {
+            $timeout, mmCoreEventLanguageChanged, mmCoreEventSiteUpdated, $mmSideMenu, $ionicNavBarDelegate) {
 
     $mmSideMenu.setScope($scope);
     $scope.handlers = $mmSideMenuDelegate.getNavHandlers();
@@ -66,5 +66,10 @@ angular.module('mm.core.sidemenu')
         if (updateSiteObserver && updateSiteObserver.off) {
             updateSiteObserver.off();
         }
+    });
+
+    $scope.$on('$ionicView.beforeEnter', function (e, data) { 
+        console.log('show menu' + data.enableBack);
+        $scope.isBackButtonShown = data.enableBack;
     });
 });
