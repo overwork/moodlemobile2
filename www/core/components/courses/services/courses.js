@@ -239,7 +239,6 @@ angular.module('mm.core.courses')
         }
 
         return $mmSitesManager.getSite(siteid).then(function(site) {
-
             var userid = site.getUserId(),
                 presets = {
                     cacheKey: getUserCoursesCacheKey(),
@@ -261,6 +260,27 @@ angular.module('mm.core.courses')
         });
     };
 
+    self.getUserCourseCategories = function(preferCache, siteid) {
+        siteid = siteid || $mmSite.getId();
+        return $mmSitesManager.getSite(siteid).then(function(site) {
+            return self.getUserCourses().then(function(courses) {
+                var params = [];
+                var exploredCategories = [];
+                var categoryIDs = "";
+                angular.forEach(courses, function(c) {
+                    if (exploredCategories.indexOf(c.category) == -1) {
+                        exploredCategories.push(c.category);
+                    }
+                });
+                params['criteria'] = {'key': 'ids', 'value': exploredCategories.join()};
+
+                return self.getCategories(site, courses, params);
+            }).then(function(tasks) {
+                return tasks;
+            });
+        });
+    };
+
     /**
      * Get cache key for get user courses WS call.
      *
@@ -270,6 +290,25 @@ angular.module('mm.core.courses')
         return 'mmCourses:usercourses';
     }
 
+    self.getCategories = function(site, courses, params) {
+        return site.read('core_course_get_categories', params).then(function(categories) {
+            var tasks = [];
+
+            angular.forEach(categories, function(cat) {
+                var element = [];
+                element.name = cat.name;
+                element.isCategory = true;
+                element.tree = [];
+                angular.forEach(courses, function(course) {
+                    if(course.category == cat.id) {
+                        element.tree.push({'name': course.fullname, 'course': course, 'isCategory': false});
+                    }
+                });
+                tasks.push(element);
+            });
+            return tasks;
+        });
+    };
     /**
      * Invalidates get course WS call.
      *
