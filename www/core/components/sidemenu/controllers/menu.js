@@ -68,8 +68,13 @@ angular.module('mm.core.sidemenu')
         }
     });
 
-    $scope.$on('$ionicView.beforeEnter', function (e, data) { 
-        console.log('show menu' + data.enableBack);
-        $scope.isBackButtonShown = data.enableBack;
+    $scope.$on('$ionicView.beforeEnter', function (e, data) {
+        console.log('back btn menu ' + data.enableBack);
+        var menuButton = angular.element(document.querySelector('#mm-side-menu-btn-menu'));
+        if (data.enableBack) {
+            menuButton.addClass('hide');
+        } else {
+            menuButton.removeClass('hide');
+        }
     });
 });
