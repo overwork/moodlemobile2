@@ -33,6 +33,7 @@ angular.module('mm.core.course')
 
     $scope.sitehome = (courseId === siteHomeId); // Are we visiting the site home?
     $scope.sections = []; // Reset scope.sections, otherwise an error is shown in console with tablet view.
+    $scope.sectionHasContent = $mmCourseHelper.sectionHasContent;
 
     if (sectionId < 0) {
         // Special scenario, we want all sections.
@@ -84,7 +85,7 @@ angular.module('mm.core.course')
                     var hasContent = false;
 
                     angular.forEach(sections, function(section) {
-                        if (section.summary != '' || section.modules.length) {
+                        if ($mmCourseHelper.sectionHasContent(section)) {
                             hasContent = true;
                         }
 
@@ -111,10 +112,12 @@ angular.module('mm.core.course')
                     $scope.sections = sections;
                     $scope.hasContent = hasContent;
 
-                    // Add log in Moodle.
-                    $mmSite.write('core_course_view_course', {
-                        courseid: courseId
-                    });
+                    // Add log in Moodle. The 'section' attribute was added in Moodle 3.2 so maybe it isn't available.
+                    if (sectionId > 0 && sections[0] && typeof sections[0].section != 'undefined') {
+                        $mmCourse.logView(courseId, sections[0].section);
+                    } else {
+                        $mmCourse.logView(courseId);
+                    }
                 }, function(error) {
                     if (error) {
                         $mmUtil.showErrorModal(error);

@@ -270,6 +270,25 @@ em {
     }
 }
 
+/* Show buttons as tabs */
+.tabs.tabs-free {
+  position: initial;
+  background: transparent;
+  border: 0;
+  margin-bottom: 0;
+
+  .tab-item {
+    margin-top: -1px;
+    max-width: initial;
+
+    &.active, &.activated {
+      margin-top: -1px;
+      border-top-width: 0;
+      border-bottom-width: 3px;
+    }
+  }
+}
+
 .user-with-avatar {
   position: relative;
   z-index: 2;
@@ -591,6 +610,25 @@ mm-timer {
   padding: 0;
 }
 
+.item-input-inset.item-stacked-label .item-input-wrapper.item-select {
+  display: block;
+
+  select {
+    background: transparent;
+    padding: 12px;
+    margin: 0;
+    width: 100%;
+    position: relative;
+    max-width: 100%;
+    direction: ltr;
+    line-height: 14px;
+  }
+}
+
+.item-input-inset .item-input-wrapper input {
+  width: 100%;
+}
+
 .button.mm-button-icon-small {
   padding: 0 3px;
   min-height: $mm-button-icon-small-height;
@@ -646,6 +684,14 @@ mm-format-text {
   padding-top: 0;
   padding-left: 0;
   padding-right: 0;
+}
+
+.item.mm-course-handlers {
+  padding: 6px 2px;
+
+  .tabs {
+    background: white;
+  }
 }
 
 /**
