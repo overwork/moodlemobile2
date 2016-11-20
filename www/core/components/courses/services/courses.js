@@ -272,7 +272,12 @@ angular.module('mm.core.courses')
                         exploredCategories.push(c.category);
                     }
                 });
-                params['criteria'] = {'key': 'ids', 'value': exploredCategories.join()};
+                params.criteria = [
+                    {
+                        key: 'ids',
+                        value: exploredCategories.join()
+                    }
+                ];
 
                 return self.getCategories(site, courses, params);
             }).then(function(tasks) {
