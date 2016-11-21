@@ -27,7 +27,7 @@ angular.module('mm.addons.calendar')
     $log = $log.getInstance('mmaCalendarListCtrl');
     $scope.syncSpecificEvent = false;
     $scope.eventsToSync = [];
-    $scope.events
+    $scope.currentEventsInLocalCalendar = [];
 
     var daysLoaded,
         emptyEventsTimes; // Variable to identify consecutive calls returning 0 events.
@@ -86,7 +86,6 @@ angular.module('mm.addons.calendar')
             }
             $scope.eventsLoaded = true;
         });
-        findAllEvents();
     }
 
     initVars();
@@ -94,6 +93,7 @@ angular.module('mm.addons.calendar')
 
     // Get first events.
     fetchEvents();
+    getEventsFromLocalCalendar();
 
     // Load more events.
     $scope.loadMoreEvents = function() {
@@ -109,66 +109,33 @@ angular.module('mm.addons.calendar')
                 $scope.$broadcast('scroll.refreshComplete');
             });
         });
-        findAllEvents();
     };
 
     $scope.syncAllEvents = function(events) {
-        var promises = [];
-        console.log("Sync all events: ", events);
         $scope.eventsToSync = events;
-
-        angular.forEach($scope.eventsToSync, function (event) {
-           var promise = $mmaCalendar.syncEventToLocalCalendar(event).then(function (result) {
-                console.log("done adding event, result is " + result);
-                if (result === 1) {
-                    console.log("success");
-                    //update event
-                } else {
-                    console.log("error");
-                }
-            });
-            promises.push(promise);
-       });
-        $q.all(promises).then(function () {
-            console.log("All events has been synced");
-        });
-    };
-
-
-    $scope.syncSpecific = function() {
-        if($scope.syncSpecificEvent == false){
-            $scope.syncSpecificEvent = true;
-        }else{
-            $scope.syncSpecificEvent = false;
-        }
-
-    };
-
-    $scope.addEvent = function(event) {
-        console.log("add ", event);
-        $scope.eventsToSync = event;
-
-        $mmaCalendar.syncEventToLocalCalendar($scope.eventsToSync).then(function(result) {
-            console.log("done adding event, result is "+result);
-            if(result === 1) {
-                event.status = 1;
-                console.log("success");
+        if (events && events.length) {
+            return events.reduce(function(promise, event) {
+                return promise.then(function() {
+                  return $mmaCalendar.syncEventToLocalCalendar(event);
+                });
+            }, $q.when());
             } else {
-                console.log("error");
-                //For now... maybe just tell the user it didn't work?
+                return $q.resolve();
             }
-        });
-
-
-
     };
-    $scope.findAllEvents = function() {
 
-        $cordovaCalendar.findAllEventsInNamedCalendar('Moodle Calendar').then(function (result) {
-            console.log(result);
-        }, function (err) {
-            // error
-        });
+    function getEventsFromLocalCalendar() {
+        $scope.syncedEvents = [];
+        var syncedEvent = [];
+            angular.forEach($scope.events, function (event) {
+                return $mmaCalendar.findEventInLocalCalendar(event).then(function (e) {
+                    syncedEvent = e;
+                    $scope.syncedEvents.push(syncedEvent);
+                    console.log(syncedEvent);
+                }, function (err) {
+                    //error
+                });
+            });
+    }
 
-    };
 });

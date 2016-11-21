@@ -62,7 +62,9 @@ angular.module('mm.addons.calendar')
     // Get event.
     fetchEvent().finally(function() {
         $scope.eventLoaded = true;
+        getEventFromLocalCalendar();
     });
+
 
     // Pull to refresh.
     $scope.refreshEvent = function() {
@@ -86,5 +88,29 @@ angular.module('mm.addons.calendar')
                 $mmaCalendar.updateNotificationTime($scope.event, time);
             }
         };
+    }
+
+    $scope.addEvent = function(event) {
+
+        $mmaCalendar.syncEventToLocalCalendar(event).then(function(success) {
+            console.log("success");
+            $scope.status = true;
+        }, function (error){
+            console.log("error");
+        }
+        );
+    };
+
+    function getEventFromLocalCalendar() {
+        return $mmaCalendar.findEventInLocalCalendar($scope.event).then(function(event) {
+            $scope.syncedEvent = event;
+
+            if($scope.syncedEvent[0].title == $scope.event.name)
+                $scope.status = true;
+            else
+                $scope.status = false;
+        }, function (error) {
+           //error
+        });
     }
 });

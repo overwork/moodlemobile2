@@ -448,20 +448,13 @@ angular.module('mm.addons.calendar')
 
           if (event.timestart == (event.timestart + event.timeduration)) {
               event.timeduration += 900;
-              console.log("START END SAME TIME: add duration 15: ", event.timeduration);
 
           } else {
-              console.log("START END DIFFERENT TIME");
+
           }
-
-          console.log("start ", event.timestart);
-          console.log("end ", event.timestart + event.timeduration);
-
 
           var startDate = new Date(event.timestart * 1000);
           var endDate = new Date((event.timestart + event.timeduration) * 1000);
-          console.log("Start date: ", startDate);
-          console.log("End date: ", endDate);
 
           $cordovaCalendar.createCalendar({
               calendarName: 'Moodle Calendar',
@@ -477,13 +470,33 @@ angular.module('mm.addons.calendar')
           }).then(function (result) {
               console.log('success');
               console.dir(result);
-              deferred.resolve(1);
+              deferred.resolve();
           }, function (err) {
               console.log('error');
               console.dir(err);
-              deferred.resolve(0);
+              deferred.reject();
           });
           return deferred.promise;
+    };
+
+    self.findEventInLocalCalendar = function(event) {
+        if (event.timestart == (event.timestart + event.timeduration))
+            event.timeduration += 900;
+
+        var startDate = new Date(event.timestart * 1000);
+        var endDate = new Date((event.timestart + event.timeduration) * 1000);
+
+        return $cordovaCalendar.findEvent({
+            title: event.name,
+            notes: event.description,
+            startDate: startDate,
+            endDate: endDate
+        }).then(function (result) {
+            return result;
+        }, function (err) {
+            console.log("thiss is the service erro", err);
+            return err;
+        });
     };
 
     return self;
