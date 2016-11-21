@@ -925,3 +925,13 @@ input[type="text"].cloned-text-input, textarea.cloned-text-input{
     margin-right: 6px !important;
   }
 }
+
+.offline img {
+  border: solid 2px red;
+}
+.online img {
+  border: solid 2px limegreen;
+}
+.away img {
+  border: solid 2px orange;
+}

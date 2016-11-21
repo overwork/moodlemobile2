@@ -21,10 +21,12 @@ angular.module('mm.addons.calendar')
  * @ngdoc controller
  * @name mmaCalendarListCtrl
  */
-.controller('mmaCalendarListCtrl', function($scope, $stateParams, $log, $state, $mmaCalendar, $mmUtil, $ionicHistory,
+.controller('mmaCalendarListCtrl', function($scope, $stateParams, $log, $cordovaCalendar, $timeout, $state, $mmaCalendar, $mmUtil, $ionicHistory,
         mmaCalendarDaysInterval) {
 
     $log = $log.getInstance('mmaCalendarListCtrl');
+    $scope.syncSpecificEvent = false;
+    $scope.eventsToSync = [];
 
     var daysLoaded,
         emptyEventsTimes; // Variable to identify consecutive calls returning 0 events.
@@ -105,5 +107,51 @@ angular.module('mm.addons.calendar')
                 $scope.$broadcast('scroll.refreshComplete');
             });
         });
+    };
+
+    $scope.syncAllEvents = function(events){
+        console.log("Sync all events: ", events);
+        $scope.eventsToSync = events;
+
+        for(var i in $scope.eventsToSync){
+           $mmaCalendar.syncEventToLocalCalendar($scope.eventsToSync[i]).then(function(result) {
+                console.log("done adding event, result is "+result);
+                if(result === 1) {
+                    //update the event
+                    console.log("success");
+                } else {
+                    console.log("error");
+                    //error
+                }
+            });
+        }
+    };
+
+
+    $scope.syncSpecific = function() {
+        if($scope.syncSpecificEvent == false){
+            $scope.syncSpecificEvent = true;
+        }else{
+            $scope.syncSpecificEvent = false;
+        }
+    };
+
+    $scope.addEvent = function(event) {
+        console.log("add ", event);
+        $scope.eventsToSync = event;
+
+        $mmaCalendar.syncEventToLocalCalendar($scope.eventsToSync).then(function(result) {
+            console.log("done adding event, result is "+result);
+            if(result === 1) {
+                //update the event
+                console.log("success");
+            } else {
+                console.log("error");
+                //For now... maybe just tell the user it didn't work?
+            }
+        });
+
+
+
     };
 });

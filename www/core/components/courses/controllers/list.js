@@ -21,20 +21,30 @@ angular.module('mm.core.courses')
  * @ngdoc controller
  * @name mmCoursesListCtrl
  */
-.controller('mmCoursesListCtrl', function($scope, $mmCourses, $mmCoursesDelegate, $mmUtil, $mmEvents, $mmSite, $q,
+.controller('mmCoursesListCtrl', function($scope, $log, $mmCourses, $timeout, $mmCoursesDelegate, $mmUtil, $mmEvents, $mmSite,
             mmCoursesEventMyCoursesUpdated, mmCoursesEventMyCoursesRefreshed) {
 
     $scope.searchEnabled = $mmCourses.isSearchCoursesAvailable();
     $scope.areNavHandlersLoadedFor = $mmCoursesDelegate.areNavHandlersLoadedFor;
     $scope.filter = {};
+    $scope.courses;
+    $scope.selectedCategory = 0;
+    $scope.distinct = [{'categoryID':0, 'categoryName':"All Categories"}];
+    $scope.unique = {};
+    $scope.browsedCourses = [];
+    $scope.allCourses = [];
 
     // Convenience function to fetch courses.
     function fetchCourses(refresh) {
         return $mmCourses.getUserCourses().then(function(courses) {
-            $scope.courses = courses;
+            $scope.allCourses = courses;
+            $scope.courses = $scope.allCourses;
+            angular.forEach(courses, function(course) {
+                course._handlers = $mmCoursesDelegate.getNavHandlersFor(course.id, refresh);
+            });
             $scope.filter.filterText = ''; // Filter value MUST be set after courses are shown.
 
-            return loadCoursesNavHandlers(refresh);
+            $scope.browseCategory();
         }, function(error) {
             if (typeof error != 'undefined' && error !== '') {
                 $mmUtil.showErrorModal(error);
@@ -43,53 +53,13 @@ angular.module('mm.core.courses')
             }
         });
     }
-
-    // Convenience function to load the handlers of each course.
-    function loadCoursesNavHandlers(refresh) {
-        var promises = [],
-            navOptions,
-            admOptions,
-            courseIds = $scope.courses.map(function(course) {
-                return course.id;
-            });
-
-        // Get user navigation and administration options to speed up handlers loading.
-        promises.push($mmCourses.getUserNavigationOptions(courseIds).catch(function() {
-            // Couldn't get it, return empty options.
-            return {};
-        }).then(function(options) {
-            navOptions = options;
-        }));
-
-        promises.push($mmCourses.getUserAdministrationOptions(courseIds).catch(function() {
-            // Couldn't get it, return empty options.
-            return {};
-        }).then(function(options) {
-            admOptions = options;
-        }));
-
-        return $q.all(promises).then(function() {
-            angular.forEach($scope.courses, function(course) {
-                course._handlers = $mmCoursesDelegate.getNavHandlersFor(
-                            course.id, refresh, navOptions[course.id], admOptions[course.id]);
-            });
-        });
-    }
-
     fetchCourses().finally(function() {
         $scope.coursesLoaded = true;
     });
 
     $scope.refreshCourses = function() {
-        var promises = [];
-
         $mmEvents.trigger(mmCoursesEventMyCoursesRefreshed);
-
-        promises.push($mmCourses.invalidateUserCourses());
-        promises.push($mmCourses.invalidateUserNavigationOptions());
-        promises.push($mmCourses.invalidateUserAdministrationOptions());
-
-        $q.all(promises).finally(function() {
+        $mmCourses.invalidateUserCourses().finally(function() {
             fetchCourses(true).finally(function() {
                 $scope.$broadcast('scroll.refreshComplete');
             });
@@ -101,4 +71,43 @@ angular.module('mm.core.courses')
             fetchCourses();
         }
     });
+
+    $scope.browseCategory = function(){
+        for( var i in $scope.allCourses ){
+            if( typeof($scope.unique[$scope.allCourses[i].category]) == "undefined"){
+                $mmCourses.search($scope.allCourses[i].shortname).then(function(response) {
+                    //List will always contain one object, therefore we get the first course object from list
+                    var arr = {};
+                    arr['categoryID'] = response.courses[0].categoryid;
+                    arr['categoryName'] = response.courses[0].categoryname;
+                    $scope.distinct.push(arr);
+                }).catch(function(message) {
+                    $scope.canLoadMore = false;
+                    if (message) {
+                        $mmUtil.showErrorModal(message);
+                    } else {
+                        $mmUtil.showErrorModal('mm.courses.errorsearching', true);
+                    }
+                    return $q.reject();
+                });
+
+            }
+            $scope.unique[$scope.allCourses[i].category] = 0;
+        }
+    };
+
+    $scope.showCategory = function(uniqueCategory){
+        if(uniqueCategory == 0) {
+            $scope.courses = $scope.allCourses;
+            return;
+        }
+        $scope.browsedCourses = [];
+
+        for( var i in $scope.allCourses){
+            if($scope.allCourses[i].category == uniqueCategory){
+              $scope.browsedCourses.push($scope.allCourses[i]);
+            }
+        }
+        $scope.courses = $scope.browsedCourses;
+    }
 });
