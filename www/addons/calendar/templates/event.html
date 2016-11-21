@@ -25,6 +25,14 @@
                     <li class="item item-text-wrap" ng-if="event.description">
                         <mm-format-text class="mm-content-with-float" watch="true">{{event.description}}</mm-format-text>
                     </li>
+                    <li class="item item-text-wrap" ng-if="status">
+                        <mm-format-text class="mm-content-with-float" watch="true">This event is syncronized</mm-format-text>
+                    </li>
+                    <li ng-if="!status" >
+                        <button ng-click="addEvent(event)" class="button button-clear button-block button-dark">
+                            <div class="title ion-loop"> Syncronize event</div>
+                        </button>
+                    </li>
                 </ul>
             </article>
             <div class="card" ng-if="notificationsEnabled">

@@ -446,44 +446,57 @@ angular.module('mm.addons.calendar')
     self.syncEventToLocalCalendar = function(event){
         var deferred = $q.defer();
 
-         if(event.timestart == (event.timestart + event.timeduration)){
-         event.timeduration += 900;
-         console.log("START END SAME TIME: add duration 15: ", event.timeduration);
+          if (event.timestart == (event.timestart + event.timeduration)) {
+              event.timeduration += 900;
 
-         }else{
-         console.log("START END DIFFERENT TIME");
-         }
+          } else {
 
-         console.log("start ", event.timestart);
-         console.log("end ", event.timestart + event.timeduration);
-
+          }
 
           var startDate = new Date(event.timestart * 1000);
-         var endDate = new Date((event.timestart + event.timeduration) * 1000);
-         console.log("Start date: ", startDate);
-         console.log("End date: ", endDate);
+          var endDate = new Date((event.timestart + event.timeduration) * 1000);
 
-         $cordovaCalendar.createCalendar({
-         calendarName: 'Moodle Calendar',
-         calendarColor: '#ff8c00'
-         });
+          $cordovaCalendar.createCalendar({
+              calendarName: 'Moodle Calendar',
+              calendarColor: '#ff8c00'
+          });
 
-         $cordovaCalendar.createEventInNamedCalendar({
-         title: event.name,
-         notes: event.description,
-         startDate: startDate,
-         endDate: endDate,
-         calendarName: 'Moodle Calendar'
-         }).then(function (result) {
-             console.log('success');console.dir(result);
-             deferred.resolve(1);
-         }, function (err) {
-             console.log('error');console.dir(err);
-             deferred.resolve(0);
-         });
+          $cordovaCalendar.createEventInNamedCalendar({
+              title: event.name,
+              notes: event.description,
+              startDate: startDate,
+              endDate: endDate,
+              calendarName: 'Moodle Calendar'
+          }).then(function (result) {
+              console.log('success');
+              console.dir(result);
+              deferred.resolve();
+          }, function (err) {
+              console.log('error');
+              console.dir(err);
+              deferred.reject();
+          });
+          return deferred.promise;
+    };
 
-        return deferred.promise;
+    self.findEventInLocalCalendar = function(event) {
+        if (event.timestart == (event.timestart + event.timeduration))
+            event.timeduration += 900;
 
+        var startDate = new Date(event.timestart * 1000);
+        var endDate = new Date((event.timestart + event.timeduration) * 1000);
+
+        return $cordovaCalendar.findEvent({
+            title: event.name,
+            notes: event.description,
+            startDate: startDate,
+            endDate: endDate
+        }).then(function (result) {
+            return result;
+        }, function (err) {
+            console.log("thiss is the service erro", err);
+            return err;
+        });
     };
 
     return self;
