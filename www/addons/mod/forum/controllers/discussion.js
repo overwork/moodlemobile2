@@ -119,8 +119,8 @@ angular.module('mm.addons.mod_forum')
             var posts = offlineReplies.concat(onlinePosts);
             $scope.discussion = $mmaModForum.extractStartingPost(posts);
 
-            //If nestedDiscussion is selected, sorting is disabled and nested posts will be displayed
-            if ($scope.nestedDiscussion) {
+            // If $scope.nested.isnested is true, normal sorting is disabled and nested posts will be displayed.
+            if ($scope.nested.isnested) {
                 $scope.posts = $mmaModForum.constructDiscussionTree(posts, $scope.discussion.id);
             } else {
                 // Set default reply subject.
@@ -156,8 +156,10 @@ angular.module('mm.addons.mod_forum')
     // Function to change posts sorting.
     $scope.changeSort = function(init) {
         $scope.discussionLoaded = false;
-        //Set nestedDiscussion to false
-        $scope.nestedDiscussion = false;
+        // Set $scope.nested attributes to default.
+        $scope.nested.icon = 'ion-arrow-swap';
+        $scope.nested.isnested = false;
+        $scope.nested.text = $translate.instant('mma.mod_forum.nestposts');
 
         if (!init) {
             $scope.sort.direction = $scope.sort.direction == 'ASC' ? 'DESC' : 'ASC';
@@ -176,16 +178,14 @@ angular.module('mm.addons.mod_forum')
 
     // Function to change nested posts.
     $scope.nestPosts = function(init) {
-        $scope.nestedDiscussion = !$scope.nestedDiscussion;
-
-        $scope.nested.isnested = $scope.nestedDiscussion;
+        $scope.nested.isnested = !$scope.nested.isnested;
 
         return fetchPosts(init).then(function() {
             if ($scope.nested.isnested) {
                 $scope.nested.icon = 'ion-navicon';
                 $scope.nested.text = $translate.instant('mma.mod_forum.flatposts');
             } else {
-                $scope.nested.icon = 'ion-arrow-right-c';
+                $scope.nested.icon = 'ion-arrow-swap';
                 $scope.nested.text = $translate.instant('mma.mod_forum.nestposts');
             }
         });
