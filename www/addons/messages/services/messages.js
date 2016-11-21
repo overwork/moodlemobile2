@@ -1044,6 +1044,19 @@ angular.module('mm.addons.messages')
     };
 
     /**
+     * Check if discussions can be deleted in current site.
+     *
+     * @module mm.addons.messages
+     * @ngdoc method
+     * @name $mmaMessages#canDeleteDiscussion
+     * @return {Boolean} True if can delete discussions, false otherwise.
+     */
+    self.canDeleteDiscussion = function() {
+        return $mmSite.wsAvailable('core_message_delete_conversation')
+            && $mmSite.wsAvailable('core_message_mark_all_messages_as_read');
+    };
+
+    /**
      * Delete a discussion (online or offline).
      *
      * @module mm.addons.messages
@@ -1053,9 +1066,16 @@ angular.module('mm.addons.messages')
      * @return {Promise}       Promise resolved when the discussion has been deleted.
      */
     self.deleteDiscussion = function(discussion) {
-        // NOTE: Currently only deletes online, as it could only delete offline if all messages
-        // are offline, and it would have to check each message.
-        return self.deleteDiscussionOnline(discussion.message.user);
+        // Need to mark messages as read, otherwise and empty discussion
+        // may show when refetching messages.
+        return self.markAllMessagesAsRead(discussion.message.user).then(function() {
+            return self.deleteDiscussionOnline(discussion.message.user).then(function() {
+                // Delete offline messages only if online deletion succeeded.
+                // This is to prevent the case where only offline messages (pending) are
+                // deleted, and online messages (sent) remain.
+                return $mmaMessagesOffline.deleteMessagesToUser(discussion.user);
+            });
+        });
     };
 
     /**
@@ -1076,6 +1096,29 @@ angular.module('mm.addons.messages')
             };
         return $mmSite.write('core_message_delete_conversation', params).then(function() {
             return self.invalidateDiscussionsCache();
+        });
+    };
+
+    /** Mark all messages in a discussion as read.
+     *
+     * @module mm.addons.messages
+     * @ngdoc method
+     * @name $mmaMessages#markAllMessagesAsRead
+     * @param {Number} usertoId ID of user discussion is with.
+     * @param {Number} [userId] User we want to mark the messages as read for. If not defined, use current user.
+     * @return {Promise}        Promise resolved when the messages have been marked as read.
+     */
+    self.markAllMessagesAsRead = function(usertoId, userId) {
+        userId = userId || $mmSite.getUserId();
+        var params = {
+            useridfrom: usertoId,
+            useridto: userId
+        };
+        var preSets = {
+            typeExpected: 'boolean'
+        };
+        return $mmSite.write('core_message_mark_all_messages_as_read', params, preSets).then(function() {
+            return self.invalidateDiscussionCache(userId);
         });
     };
 

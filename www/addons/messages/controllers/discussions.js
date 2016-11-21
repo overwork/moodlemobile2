@@ -27,6 +27,7 @@ angular.module('mm.addons.messages')
         siteId = $mmSite.getId(),
         discussions;
 
+    $scope.canDelete = $mmaMessages.canDeleteDiscussion();
     $scope.loaded = false;
 
     var discussionOptionsWidth;

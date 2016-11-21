@@ -12,7 +12,7 @@
                     <p><mm-format-text watch="true" clean="true" singleline="true">{{disc.message.message | mmaMessagesFormat}}</mm-format-text></p>
                 </a>
                 <ul class="mma-messages-discussions-options">
-                    <li>
+                    <li ng-if="canDelete">
                         <button class="mma-messages-discussions-delete" ng-click="deleteDiscussion(disc)">
                             <i class="ion-minus-circled"></i>
                         </button>
